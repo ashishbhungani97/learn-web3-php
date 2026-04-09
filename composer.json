@@ -1,5 +1,9 @@
 {
     "require": {
-        "web3p/web3.php": "dev-master"
+        "sc0vu/web3.php": "dev-master",
+        "simplito/elliptic-php": "^1.0",
+        "web3p/ethereum-tx": "^0.4.3",
+        "brick/math": "^0.11.0",
+        "kornrunner/keccak": "^1.1"
     }
 }
