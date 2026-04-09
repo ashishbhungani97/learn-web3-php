@@ -350,4 +350,48 @@ class Web3Service
             return null;
         }
     }
+
+
+    // ── Signature ──────────────────────────────────────────────
+ 
+    /**
+     * Verify an Ethereum personal_sign signature and return the recovered wallet address.
+     *
+     * Compatible with MetaMask, ethers.js, wagmi, and any EIP-191 personal_sign wallet.
+     *
+     * Usage:
+     *   $recovered = $web3service->verifySignature($message, $signature);
+     *   if ($recovered === strtolower($claimedAddress)) { // ✅ verified }
+     *
+     * @param  string  $message    Plain-text message that was signed (before hashing).
+     * @param  string  $signature  0x-prefixed 65-byte hex signature from personal_sign.
+     * @return string              Lowercase recovered Ethereum address (e.g. "0xabc...").
+     * @throws \Exception          If the signature is malformed or EC recovery fails.
+     */
+    public function verifySignature(string $message, string $signature): string
+    {
+        // EIP-191 prefix — identical to what MetaMask prepends before signing
+        $prefix      = "\x19Ethereum Signed Message:\n" . strlen($message);
+        $messageHash = Keccak::hash($prefix . $message, 256);
+ 
+        // Strip 0x, then split the 65-byte signature into r (32), s (32), v (1)
+        $sig = ltrim($signature, '0x');
+        $r   = substr($sig, 0,   64);
+        $s   = substr($sig, 64,  64);
+        $v   = hexdec(substr($sig, 128, 2));
+ 
+        // Normalise v — some wallets return 0/1 instead of the expected 27/28
+        if ($v < 27) {
+            $v += 27;
+        }
+ 
+        $ec     = new EC('secp256k1');
+        $pubKey = $ec->recoverPubKey($messageHash, ['r' => $r, 's' => $s], $v - 27);
+ 
+        // Ethereum address = last 20 bytes of keccak256(uncompressed pubkey, without 04 prefix)
+        $pubKeyBin = hex2bin(substr($pubKey->encode('hex'), 2));
+        $address   = '0x' . substr(Keccak::hash($pubKeyBin, 256), 24);
+ 
+        return strtolower($address);
+    }
 }
