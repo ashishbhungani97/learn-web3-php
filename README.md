@@ -24,7 +24,7 @@ This script connects to a BSC Testnet (or any EVM RPC), attaches a deployed cont
 Install via Composer:
 
 ```bash
-composer require sc0vu/web3.php kornrunner/keccak elliptic/elliptic web3p/ethereum-tx
+composer require sc0vu/web3.php kornrunner/keccak elliptic/elliptic web3p/ethereum-tx --ignore-platform-reqs
 ```
 
 ---
